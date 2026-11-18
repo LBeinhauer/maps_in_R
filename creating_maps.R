@@ -195,6 +195,33 @@ make_route_map <- function(stops, map_name, view = NULL, bends = c(0.25, -0.25),
   invisible(p)
 }
 
+make_poster_map <- function(title, center_ll, half = 4500,
+                            font = "Georgia", file = NULL) {
+  view <- view_center(center_ll, half)
+  cx   <- mean(c(view[["xmin"]], view[["xmax"]]))
+  ymin <- view[["ymin"]]
+  h2   <- 2 * half
+  
+  # Letter-spaced title, e.g. "K I E L"
+  title_sp <- paste(strsplit(toupper(title), "")[[1]], collapse = " ")
+  
+  # Coordinates as "54.32°N  10.14°E"
+  coord_label <- sprintf("%.3f°%s  %.3f°%s",
+                         abs(center_ll[2]), ifelse(center_ll[2] >= 0, "N", "S"),
+                         abs(center_ll[1]), ifelse(center_ll[1] >= 0, "E", "W"))
+  
+  p <- base_map(view) +
+    annotate("text", x = cx, y = ymin + 0.095 * h2, label = title_sp,
+             size = 28, fontface = "bold", family = font, color = "grey10") +
+    annotate("text", x = cx, y = ymin + 0.045 * h2, label = coord_label,
+             size = 10, family = font, color = "grey30")
+  
+  dir.create("maps", showWarnings = FALSE)
+  ggsave(file %||% sprintf("maps/poster_%s.png", tolower(title)),
+         p, width = 30, height = 30, units = "cm", dpi = 300)
+  invisible(p)
+}
+
 
 
 
@@ -245,3 +272,7 @@ p2
 p3
 p4
 p5
+
+
+poster <- make_poster_map("Kiel", center_ll = c(10.1394, 54.3233), half = 4500)
+poster
